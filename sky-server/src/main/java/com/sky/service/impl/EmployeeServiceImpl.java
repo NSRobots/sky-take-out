@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
@@ -95,15 +96,74 @@ public class EmployeeServiceImpl implements EmployeeService {
         return row;
     }
 
+    /**
+     * 员工分页查询
+     *
+     * @param employeePageQueryDTO 请求的数据实体对象
+     * @return
+     */
     @Override
     public PageResult pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
         //设置分页插件
         PageHelper.startPage(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize());
-
-        Page<Employee> pages = employeeMapper.pageQuery(employeePageQueryDTO);
+        //获取分页查询到后的数据
+        List<Employee> pages = employeeMapper.pageQuery(employeePageQueryDTO);
 
         return new PageResult(employeePageQueryDTO.getPageSize(), pages);
 
     }
 
+    /**
+     * 员工状态修改
+     *
+     * @param status
+     * @param id
+     * @return
+     */
+    @Override
+    public Integer statusForStartOrStop(Integer status, Long id) {
+        //lomcok的new对象方式
+        Employee employee = Employee.builder()
+                .status(status)
+                .id(id)
+                //更新修改时间和修改用户
+                .updateTime(LocalDateTime.now())
+                .updateUser(BaseContext.getCurrentId())
+                .build();
+        Integer row = employeeMapper.update(employee);
+        return row;
+    }
+
+    /**
+     * 根据id，查询员工信息
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public Employee employeeQueryById(Long id) {
+        Employee employee = employeeMapper.queryById(id);
+        return employee;
+    }
+
+    /**
+     * 更新员工信息
+     *
+     * @param employeeDTO
+     * @return
+     */
+    @Override
+    public Integer employeeUpdate(EmployeeDTO employeeDTO) {
+        Employee employee = new Employee();
+        //json收到的数据传给employee类
+        BeanUtils.copyProperties(employeeDTO, employee);
+        //设置修改用户为当前用户
+        employee.setUpdateUser(BaseContext.getCurrentId());
+        //设置修改时间为当前时间
+        employee.setUpdateTime(LocalDateTime.now());
+        //注意密码安全
+        employee.setPassword("*****");
+
+        return employeeMapper.update(employee);
+    }
 }

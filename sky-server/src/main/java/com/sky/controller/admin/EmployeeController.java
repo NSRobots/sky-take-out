@@ -51,18 +51,10 @@ public class EmployeeController {
         //登录成功后，生成jwt令牌
         Map<String, Object> claims = new HashMap<>();
         claims.put(JwtClaimsConstant.EMP_ID, employee.getId());
-        String token = JwtUtil.createJWT(
-                jwtProperties.getAdminSecretKey(),
-                jwtProperties.getAdminTtl(),
-                claims);
+        String token = JwtUtil.createJWT(jwtProperties.getAdminSecretKey(), jwtProperties.getAdminTtl(), claims);
 
         //初始化EmployeeLoginVO对象
-        EmployeeLoginVO employeeLoginVO = EmployeeLoginVO.builder()
-                .id(employee.getId())
-                .userName(employee.getUsername())
-                .name(employee.getName())
-                .token(token)
-                .build();
+        EmployeeLoginVO employeeLoginVO = EmployeeLoginVO.builder().id(employee.getId()).userName(employee.getUsername()).name(employee.getName()).token(token).build();
 
         return Result.success(employeeLoginVO);
     }
@@ -104,5 +96,42 @@ public class EmployeeController {
         log.info("分页查询员工：{}", employeePageQueryDTO);
         PageResult pr = employeeService.pageQuery(employeePageQueryDTO);
         return Result.success(pr);
+    }
+
+    /**
+     * 修改员工状态
+     * 注意RESTFul风格的路径
+     *
+     * @param status
+     * @param id
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    @ApiOperation("启用或禁用员工")
+    public Result statusForStartOrStop(@PathVariable Integer status, Long id) {
+        log.info("启用、禁用员工：{},{}", status, id);
+        employeeService.statusForStartOrStop(status, id);
+        return Result.success();
+    }
+
+    /**
+     * 根据id查询员工信息
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    @ApiOperation("根据ID查询员工")
+    public Result employeeQueryById(@PathVariable Long id) {
+        Employee employee = employeeService.employeeQueryById(id);
+        return Result.success(employee);
+    }
+
+    @PutMapping
+    @ApiOperation("编辑员工信息")
+    public Result employeeUpdate(@RequestBody EmployeeDTO employeeDTO) {
+        log.info("修改员工的信息：{}", employeeDTO);
+        employeeService.employeeUpdate(employeeDTO);
+        return Result.success();
     }
 }

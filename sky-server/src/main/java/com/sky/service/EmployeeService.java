@@ -37,4 +37,29 @@ public interface EmployeeService {
      * @return
      */
     PageResult pageQuery(EmployeePageQueryDTO employeePageQueryDTO);
+
+    /**
+     * 修改员工状态
+     * 1. 注意使用@PathVariable标识路径请求参数
+     * 2. 根据ID查询当前员工，并修改其状态
+     * 3. 修改可以写一个通用的update，方便后期直接调用
+     * 4. 记得将UpdateTime更新！
+     */
+    Integer statusForStartOrStop(Integer status, Long id);
+
+    /**
+     * 根据id，查询员工信息
+     *
+     * @param id
+     * @return
+     */
+    Employee employeeQueryById(Long id);
+
+    /**
+     * 更新员工信息
+     *
+     * @param employeeDTO
+     * @return
+     */
+    Integer employeeUpdate(EmployeeDTO employeeDTO);
 }
